@@ -1188,6 +1188,7 @@ sampleplayer.CastPlayer.prototype.setType_ = function(type, isLiveStream) {
   this.type_ = type;
   this.element_.setAttribute('type', type);
   this.element_.setAttribute('live', isLiveStream.toString());
+  this.isLiveStream = !!isLiveStream;
   var overlay = this.getElementByClass_('.overlay');
   var watermark = this.getElementByClass_('.watermark');
   clearInterval(this.burnInPreventionIntervalId_);
@@ -1388,7 +1389,12 @@ sampleplayer.CastPlayer.prototype.customizedStatusCallback_ = function(
   if (mediaStatus.playerState === cast.receiver.media.PlayerState.PAUSED &&
       this.state_ === sampleplayer.State.BUFFERING) {
     mediaStatus.playerState = cast.receiver.media.PlayerState.BUFFERING;
+  } else if (this.isLiveStream && mediaStatus.playerState === cast.receiver.media.PlayerState.PAUSED) {
+    // Return status idle for paused for live streams
+    mediaStatus.playerState = cast.receiver.media.PlayerState.IDLE;
+    mediaStatus.idleReason = cast.receiver.media.IdleReason.CANCELLED;
   }
+
   return mediaStatus;
 };
 
